@@ -1,0 +1,16 @@
+.content-display > * {
+    border-radius: 4px;
+    border: 1px solid #002232;
+    margin: 3px;
+    overflow: auto;
+    background: white;
+    height: calc(100% - 4px);
+}
+
+.content-display > .content-selected {
+    display: block;
+}
+
+.content-display > :not(.content-selected) {
+    display: hidden;
+}

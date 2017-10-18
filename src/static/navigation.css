@@ -1,0 +1,65 @@
+.navigation-menu {
+    background: #2f2f2f;
+    height: 100%;
+    color: white;
+}
+
+.navigation-menu > * {
+    padding-left: 10px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 4px;
+}
+
+.navigation-menu > .menu-group {
+    width: calc(100% - 35px);
+}
+
+.navigation-menu > .menu-bordered {
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-top: 10px;
+}
+
+.navigation-menu > details {
+    padding-left: 15px;
+}
+
+.navigation-menu > details > summary, .navigation-menu > .menu-label, .navigation-menu > .menu-group > .menu-label {
+    font-size: 22px;
+    color: #b0b0f0;
+    text-align: center;
+}
+
+.navigation-menu > details > summary {
+    cursor: pointer;
+}
+
+.navigation-menu > details > summary:focus {
+    outline: 0;
+}
+
+.navigation-menu > details > *:not(summary), .navigation-menu > .menu-entry, .navigation-menu > .menu-group > .menu-entry {
+    padding-left: 30px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 16px;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+}
+
+.navigation-menu > .menu-group > .menu-entry + .menu-disabled,.navigation-menu > details > *:not(summary) + .menu-disabled{
+    color: grey;
+}
+
+.navigation-menu > .menu-group > .menu-entry:hover:not(.menu-disabled),.navigation-menu > details > *:not(summary):hover:not(.menu-disabled)  {
+    background-color: rgba(255,255,255,0.1); /* Lighten whatever background color is there */
+}
+
+.navigation-menu > .menu-group > .menu-entry {
+    color: white;
+}
+
+.navigation-menu > .menu-label {
+    color: yellow;
+}

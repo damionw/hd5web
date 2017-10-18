@@ -1,0 +1,44 @@
+/* Primary, enclosing container Fills the page */
+body > div:nth-of-type(1) {
+    height: 100%;
+    width: 100%;
+    display: table;
+}
+
+/* Header Settings */
+body > div:nth-of-type(1) > div:nth-of-type(1) {
+    height: 0;
+    margin: 2px;
+    display: table-row;
+}
+
+body > div:nth-of-type(1) > div:nth-of-type(1) > * {
+    padding: 10px;
+}
+
+/* Workspace Settings */
+body > div:nth-of-type(1) > div:nth-of-type(2) {
+    vertical-align: top;
+    display: table-row;
+    overflow: hidden;
+}
+
+/* Navigation Panel Settings */
+body > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) {
+    padding: 10px;
+    width: auto;
+    vertical-align: top;
+    height: 100%;
+    float: left;
+    overflow: auto;
+}
+
+/* Content Panel Settings */
+body > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-last-of-type(1) {
+    height: 100%;
+    width: auto;
+    vertical-align: top;
+    padding: 1px;
+    overflow: auto;
+    color: black;
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en-US">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <title>Demo Site</title>
+
+        <link rel="stylesheet" href="/static/layout.css" media="screen">
+        <link rel="stylesheet" href="/static/dropdown.css" media="screen">
+        <link rel="stylesheet" href="/static/Grid.css" media="screen">
+        <link rel="stylesheet" href="/static/navigation.css" media="screen">
+        <link rel="stylesheet" href="/static/content.css" media="screen">
+
+        <script type="application/javascript" language="javascript" src="/static/ajax.js"></script>
+        <script type="application/javascript" language="javascript" src="/static/d3.min.js"></script>
+        <script type="application/javascript" language="javascript" src="/static/functions.js"></script>
+        <script type="application/javascript" language="javascript" src="/static/splitter.js"></script>
+        <script type="application/javascript" language="javascript" src="/static/Grid.js"></script>
+
+        <style>
+            /* Layout Settings */
+            body, html {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                height: calc(100% - 2px);
+                width: calc(100% - 1px);
+                overflow: hidden;
+            }
+
+            .header {
+                background: #b00088;
+            }
+
+            .navigation {
+                background: #404040;
+                color: #a0a0f0; 
+            }
+
+            .main {
+                background: beige;
+            }
+
+            .banner {
+                text-align: center;
+                font-size: 24px;
+                width: 100%;
+                color: white;
+            }
+
+            #dashboard_surface > div {
+                overflow: hidden;
+            }
+
+            #dashboard_surface > div > div {
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="frame">
+            <div class="header">
+                <div class="banner">
+                    Mortgage Modelling Administration
+                </div>
+
+                <div class="banner">
+                    <div class="dropdown">
+                        <span class="environment_name"></span>
+                        <div class="dropdown-content environment_selection">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main" id="main">
+                <div class="navigation navigation-menu">
+                    <div class="menu-group menu-bordered">
+                        <div class="menu-label">
+                            Environment
+                        </div>
+
+                        <div class="menu-entry">
+                            Environment Details
+                        </div>
+                    </div>
+
+                    <div class="menu-group menu-bordered">
+                        <div class="menu-label">
+                            Models
+                        </div>
+
+                        <div class="menu-entry">
+                            Show Monthly Models
+                        </div>
+                    </div>
+
+                    <div class="menu-group menu-bordered">
+                        <div class="menu-label">
+                            Tasks
+                        </div>
+
+                        <div class="menu-entry">
+                            Create Monthly Model
+                        </div>
+                    </div>
+
+                    <div class="menu-group menu-bordered" id="query-list">
+                        <div class="menu-label">
+                            Queries
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dashboard_surface" class="content-display content-selected">
+                    <div>
+                        <div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script>
+//         var hsplitter = HSplit("#main");
+        init();
+    </script>
+</html>
