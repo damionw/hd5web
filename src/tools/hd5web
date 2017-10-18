@@ -4,12 +4,18 @@ first_name="${BASH_SOURCE[0]}"
 actual_name="$(readlink -f "${first_name}")"
 local_path="$(dirname "${actual_name}")"
 library_import_file="$(readlink -f "${local_path}/../lib/hd5web")"
-share_path="$(readlink -f "${local_path}/../share/hd5web")"
+share_folder="$(readlink -f "${local_path}/../share/hd5web")"
 
 #===================================================================================
 #                          Import hd5web library
 #===================================================================================
 . "${library_import_file}"
+
+#===================================================================================
+#                              Set defaults
+#===================================================================================
+listener_port=7272
+hdf5_file=
 
 #===================================================================================
 #                              Help Message
@@ -30,7 +36,7 @@ showhelp()
 #       will cause the first non option parameter to be discarded. Here, we just
 #       use -h (help)
 #===================================================================================
-long_options="help,version,debug,info,warning,fatal,hdf5:,share,lib"
+long_options="help,version,debug,info,warning,fatal,hdf5:,port:,share,lib"
 
 OPTION_TEMP=$(getopt -a -o hv --long ${long_options} -- "$@")
 
@@ -62,13 +68,18 @@ do
             ;;
 
         --share)
-            echo "${share_path}"
+            echo "${share_folder}"
             shift
             exit 0
             ;;
 
         --hdf5)
-            hdf5file="${2}"
+            hdf5_file="${2}"
+            shift 2
+            ;;
+
+        --port)
+            listener_port="${2}"
             shift 2
             ;;
 
@@ -76,6 +87,7 @@ do
             echo "${HD5WEB_VERSION}"
             exit 0
             ;;
+
         --)
             shift
             break
@@ -88,7 +100,7 @@ do
     esac
 done
 
-# exec "${share_folder}/tools/webserve" \
-#     --static="${share_folder}/static" \
-#     --module="${share_folder}/plugins/management_plugin" \
-#     --port=$(get_unused_port || echo 11111)
+HD5_HDF5FILE="${hdf5_file:?Need HDF5 file}" exec "${share_folder}/tools/webserve" \
+    --static="${share_folder}/static" \
+    --module="${share_folder}/plugins/hdf5_plugin" \
+    --port="${listener_port:?Need a port number}"

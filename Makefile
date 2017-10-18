@@ -2,7 +2,7 @@ FEATURE := $(notdir $(shell pwd))
 VERSION := $(shell bash -c '. src/lib/$(FEATURE) 2>/dev/null; echo $$HD5WEB_VERSION')
 INSTALL_PATH := /usr/local
 
-.PHONY: tests clean
+.PHONY: tests clean demo
 
 all: build/bin build/lib/$(FEATURE) build/bin/$(FEATURE) \
 	build/share/$(FEATURE)/static build/share/$(FEATURE)/plugins build/share/$(FEATURE)/examples \
@@ -13,6 +13,9 @@ all: build/bin build/lib/$(FEATURE) build/bin/$(FEATURE) \
 
 install: tests
 	@rsync -az build/ $(INSTALL_PATH)/
+
+demo: all
+        build/bin/$(FEATURE) --hdf5=/tmp/demo.h5 --port=7272
 
 version: all
 	@build/bin/$(FEATURE) --version
@@ -28,9 +31,11 @@ build/lib/$(FEATURE)-$(VERSION): build/lib
 
 build/share/$(FEATURE): build/share
 	@mkdir $@
+	@touch $(dir $@)
 
 build/share/$(FEATURE)/static: build/share/$(FEATURE)
 	@mkdir $@
+	@touch $(dir $@)
 
 build/share/$(FEATURE)/examples: build/share/$(FEATURE)
 	@rsync -az examples/ $@/
@@ -52,16 +57,16 @@ build/share/$(FEATURE)/static/Grid.css: build/share/$(FEATURE)/static checkouts/
 
 checkouts/recipes: checkouts
 	@git clone https://github.com/damionw/recipes.git $@
-	@touch checkouts/*
+	@touch $(dir $@)
 
 checkouts/webserve: checkouts
 	@git clone https://github.com/damionw/webserve.git $@
 	@$(MAKE) -C $@ tests
-	@touch checkouts/*
+	@touch $(dir $@)
 
 checkouts/Grid: checkouts
 	@git clone https://github.com/mmurph211/Grid.git $@
-	@touch checkouts/*
+	@touch $(dir $@)
 
 checkouts:
 	@install -d $@

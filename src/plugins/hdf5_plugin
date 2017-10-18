@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+
+http::hdf5::url_mappings() {
+    url::add_handler '^\/$' GET http::hdf5::response_index
+    url::add_handler '^\/index.html$' GET http::hdf5::response_index
+    url::add_handler '^\/api\/filename[\/]*$' GET http::hdf5::get_filename
+    url::add_handler '^\/static\/.*$' GET http::response_file
+}
+
+http::hdf5::response_index() {
+    http::response_file GET index.html "${3}"
+}
+
+http::hdf5::get_filename() {
+    get_response() {
+        sed -e 's/^            //g' <<"        EOF" | m4 --prefix-builtins -DHD5_HDF5FILE="${HD5_HDF5FILE}"
+            {
+                "one": "HD5_HDF5FILE"
+            }
+        EOF
+    }
+
+    get_response | http::response_json
+}
