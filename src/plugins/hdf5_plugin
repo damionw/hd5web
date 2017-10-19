@@ -1,11 +1,9 @@
 #! /usr/bin/env bash
 
-. "$("${HD5WEB_BINARY}" --lib)"
-
 http::hdf5::url_mappings() {
     url::add_handler '^\/$' GET http::hdf5::response_index
     url::add_handler '^\/index.html$' GET http::hdf5::response_index
-    url::add_handler '^\/api\/filename[\/]*$' GET http::hdf5::get_filename
+    url::add_handler '^\/api\/files[\/]*$' GET http::hdf5::get_filelist
     url::add_handler '^\/api\/tree[\/]*$' GET http::hdf5::get_tree
     url::add_handler '^\/static\/.*$' GET http::response_file
 }
@@ -14,20 +12,22 @@ http::hdf5::response_index() {
     http::response_file GET index.html "${3}"
 }
 
-http::hdf5::get_filename() {
-    get_response() {
-        sed -e 's/^            //g' <<"        EOF" | m4 --prefix-builtins -DHD5WEB_HDF5FILE="${HD5WEB_HDF5FILE}"
-            {
-                "one": "HD5WEB_HDF5FILE"
-            }
-        EOF
-    }
+http::hdf5::get_filelist() {
+    . "$("${__HD5WEB_BINARY__}" --lib)"
 
-    get_response | http::response_json
+    hdf5::files | {
+        echo "{"
+        echo "\"files\": ["
+        awk '{printf("%s\"%s\"\n", sep, $0); sep=",";}'
+        echo "]"
+        echo "}"
+    } | http::response_json
 }
 
 http::hdf5::get_tree() {
-    h5dump -n "${HD5WEB_HDF5FILE}" /tmp/demo.h5 | while read type path
+    . "$("${__HD5WEB_BINARY__}" --lib)"
+
+    h5dump -n "${__HD5WEB_HDF5FILE__}" /tmp/demo.h5 | while read type path
     do
         :
     done

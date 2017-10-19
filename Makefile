@@ -1,5 +1,5 @@
 FEATURE := $(notdir $(shell pwd))
-VERSION := $(shell bash -c '. src/lib/$(FEATURE) 2>/dev/null; echo $$HD5WEB_VERSION')
+VERSION := $(shell bash -c '. src/lib/$(FEATURE) 2>/dev/null; echo $$__HD5WEB_VERSION__')
 INSTALL_PATH := /usr/local
 
 .PHONY: tests clean demo
@@ -18,7 +18,7 @@ install: tests
 	@rsync -az build/ $(INSTALL_PATH)/
 
 demo: all
-        build/bin/$(FEATURE) --hdf5=/tmp/demo.h5 --port=7272
+	build/bin/$(FEATURE) --hdf5=/tmp/demo.h5 --port=7272
 
 version: all
 	@build/bin/$(FEATURE) --version

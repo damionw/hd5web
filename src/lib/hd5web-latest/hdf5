@@ -6,12 +6,33 @@ local_path="$(dirname "${actual_name}")"
 
 . "${local_path}/logging"
 
+hdf5::version() {
+    echo "${__HD5WEB_VERSION__}"
+}
+
+hdf5::add_files() {
+    __HD5WEB_FILES__="$((echo "${__HD5WEB_FILES__}"; echo "${1}") | sed -e 's/^[\s]*//g' -e 's/[\s]*$//g' -e '/^[\s]*$/d')"
+}
+
 hdf5::files() {
-    echo "${HD5WEB_FILES}" | sed -e 's/^[\s]*//g' -e 's/[\r]*$//g' -e '/^[\r]*$/d'
+    echo "${__HD5WEB_FILES__}" | sed -e 's/^[\s]*//g' -e 's/[\s]*$//g' -e '/^[\s]*$/d'
 }
 
 hdf5::dir() {
     local _filename="${1:?Need filename}"
 
-    h5dump -n "${_filename}" | awk '/^FILE_CONTENTS[ ]/{on=1;} /^[ ][\}]/{on=0;} {if (on) {printf("%s %s\n", $1, $2);}}' on=0
+    h5dump -n "${_filename}" | awk '
+        /^FILE_CONTENTS[ ]/ {
+            on=1;
+        }
+
+        /^[ ][}]/ {
+            on=0;
+        }
+
+        {
+            if (on) {
+                printf("type=\"%s\" path=\"%s\"\n", $1, $2);
+            }
+        }' on=0
 }

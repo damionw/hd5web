@@ -7,16 +7,16 @@ library_import_file="$(readlink -f "${local_path}/../lib/hd5web")"
 share_folder="$(readlink -f "${local_path}/../share/hd5web")"
 
 #===================================================================================
+#                              Set defaults
+#===================================================================================
+export __HD5WEB_BINARY__="${actual_name}"
+export __HD5WEB_FILES__=
+listener_port=7272
+
+#===================================================================================
 #                          Import hd5web library
 #===================================================================================
 . "${library_import_file}"
-
-#===================================================================================
-#                              Set defaults
-#===================================================================================
-export HD5WEB_BINARY="${first_name}"
-export HD5WEB_FILES=
-listener_port=7272
 
 #===================================================================================
 #                              Help Message
@@ -37,7 +37,7 @@ showhelp()
 #       will cause the first non option parameter to be discarded. Here, we just
 #       use -h (help)
 #===================================================================================
-long_options="help,version,debug,info,warning,fatal,hdf5:,port:,share,lib,demo"
+long_options="help,version,debug,info,warning,fatal,hdf5:,port:,share,lib"
 
 OPTION_TEMP=$(getopt -a -o hv --long ${long_options} -- "$@")
 
@@ -68,12 +68,6 @@ do
             exit 0
             ;;
 
-        --demo)
-            echo "${HD5WEB_FILES}" | while read name; do hdf5::dir "${name}"; done
-            shift
-            exit 0
-            ;;
-
         --share)
             echo "${share_folder}"
             shift
@@ -81,7 +75,7 @@ do
             ;;
 
         --hdf5)
-            HD5WEB_FILES="$((echo "${HD5WEB_FILES}"; echo "${2}") | sed -e 's/^[\s]*//g' -e 's/[\r]*$//g' -e '/^[\r]*$/d')"
+            hdf5::add_files "${2}"
             shift 2
             ;;
 
@@ -90,8 +84,8 @@ do
             shift 2
             ;;
 
-        --version)
-            echo "${HD5WEB_VERSION}"
+        --version|-v)
+            hdf5::version
             exit 0
             ;;
 
