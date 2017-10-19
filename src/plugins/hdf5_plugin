@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+. "$("${HD5WEB_BINARY}" --lib)"
+
 http::hdf5::url_mappings() {
     url::add_handler '^\/$' GET http::hdf5::response_index
     url::add_handler '^\/index.html$' GET http::hdf5::response_index
@@ -14,9 +16,9 @@ http::hdf5::response_index() {
 
 http::hdf5::get_filename() {
     get_response() {
-        sed -e 's/^            //g' <<"        EOF" | m4 --prefix-builtins -DHD5_HDF5FILE="${HD5_HDF5FILE}"
+        sed -e 's/^            //g' <<"        EOF" | m4 --prefix-builtins -DHD5WEB_HDF5FILE="${HD5WEB_HDF5FILE}"
             {
-                "one": "HD5_HDF5FILE"
+                "one": "HD5WEB_HDF5FILE"
             }
         EOF
     }
@@ -25,7 +27,7 @@ http::hdf5::get_filename() {
 }
 
 http::hdf5::get_tree() {
-    h5dump -n "${HD5_HDF5FILE}" /tmp/demo.h5 | while read type path
+    h5dump -n "${HD5WEB_HDF5FILE}" /tmp/demo.h5 | while read type path
     do
         :
     done

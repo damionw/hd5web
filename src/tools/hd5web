@@ -14,8 +14,9 @@ share_folder="$(readlink -f "${local_path}/../share/hd5web")"
 #===================================================================================
 #                              Set defaults
 #===================================================================================
+export HD5WEB_BINARY="${first_name}"
+export HD5WEB_FILES=
 listener_port=7272
-hdf5_file=
 
 #===================================================================================
 #                              Help Message
@@ -36,7 +37,7 @@ showhelp()
 #       will cause the first non option parameter to be discarded. Here, we just
 #       use -h (help)
 #===================================================================================
-long_options="help,version,debug,info,warning,fatal,hdf5:,port:,share,lib"
+long_options="help,version,debug,info,warning,fatal,hdf5:,port:,share,lib,demo"
 
 OPTION_TEMP=$(getopt -a -o hv --long ${long_options} -- "$@")
 
@@ -67,6 +68,12 @@ do
             exit 0
             ;;
 
+        --demo)
+            echo "${HD5WEB_FILES}" | while read name; do hdf5::dir "${name}"; done
+            shift
+            exit 0
+            ;;
+
         --share)
             echo "${share_folder}"
             shift
@@ -74,7 +81,7 @@ do
             ;;
 
         --hdf5)
-            hdf5_file="${2}"
+            HD5WEB_FILES="$((echo "${HD5WEB_FILES}"; echo "${2}") | sed -e 's/^[\s]*//g' -e 's/[\r]*$//g' -e '/^[\r]*$/d')"
             shift 2
             ;;
 
@@ -100,7 +107,7 @@ do
     esac
 done
 
-HD5_HDF5FILE="${hdf5_file:?Need HDF5 file}" exec "${share_folder}/tools/webserve" \
+exec "${share_folder}/tools/webserve" \
     --static="${share_folder}/static" \
     --module="${share_folder}/plugins/hdf5_plugin" \
     --port="${listener_port:?Need a port number}"
