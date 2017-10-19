@@ -10,6 +10,16 @@ hdf5::version() {
     echo "${__HD5WEB_VERSION__}"
 }
 
+hdf5::map() {
+    local _function="${1:?Must supply a function name}"
+    local _row
+
+    while read _row
+    do
+        "${_function}" "${_row}"
+    done
+}
+
 hdf5::add_files() {
     __HD5WEB_FILES__="$((echo "${__HD5WEB_FILES__}"; echo "${1}") | sed -e 's/^[\s]*//g' -e 's/[\s]*$//g' -e '/^[\s]*$/d')"
 }
@@ -22,7 +32,7 @@ hdf5::dir() {
     local _filename="${1:?Need filename}"
 
     h5dump -n "${_filename}" | awk '
-        /^FILE_CONTENTS[ ]/ {
+        /^[ ]*FILE_CONTENTS[ ][ ]*/ {
             on=1;
         }
 
@@ -31,8 +41,11 @@ hdf5::dir() {
         }
 
         {
-            if (on) {
-                printf("type=\"%s\" path=\"%s\"\n", $1, $2);
+            if (on == 1) {
+                on = 2;
             }
-        }' on=0
+            else if (on) {
+                printf("filename=\"%s\" type=\"%s\" path=\"%s\"\n", filename, $1, $2);
+            }
+        }' on=0 filename="${_filename}"
 }
