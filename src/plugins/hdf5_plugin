@@ -51,23 +51,31 @@ http::hdf5::get_tree() {
             }'
         )"
 
-        local _path="$(
+        local _path_elements="$(
             echo "["
             echo "${_pathnodes}" | awk '{printf("%s\"%s\"", sep, $0); sep=",";}'
             echo "]"
         )"
 
-        local _parentpath="$(
+        local _parent_elements="$(
             echo "["
             echo "${_pathnodes}" | head --lines=-1 | awk '{printf("%s\"%s\"", sep, $0); sep=",";}'
             echo "]"
         )"
 
+        local _parent="$(
+            echo "${_pathnodes}" |
+            head --lines=-1 |
+            awk '{printf("%s%s", sep, (NR > 1 ? $0 : "/")); if (NR > 1) {sep="/";}}'
+        )"
+
         echo "${_fs1}{"
         echo "\"filename\": \"${filename}\""
+        echo ",\"path\": \"${path}\""
+        echo ",\"parent\": \"${_parent}\""
         echo ",\"type\": \"${type}\""
-        echo ",\"path\": ${_path}"
-        echo ",\"parentpath\": ${_parentpath}"
+        echo ",\"path_elements\": ${_path_elements}"
+        echo ",\"parent_elements\": ${_parent_elements}"
         echo "}"
 
         _fs1=","
