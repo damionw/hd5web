@@ -5,6 +5,7 @@ http::hdf5::url_mappings() {
     url::add_handler '^\/index.html$' GET http::hdf5::response_index
     url::add_handler '^\/api\/files[\/]*$' GET http::hdf5::get_filelist
     url::add_handler '^\/api\/tree[\/]*$' GET http::hdf5::get_tree
+    url::add_handler '^\/api\/content[\/].*$' GET http::hdf5::get_content
     url::add_handler '^\/static\/.*$' GET http::response_file
 }
 
@@ -34,53 +35,65 @@ http::hdf5::get_tree() {
 
     http::hdf5::importlib
 
-    echo "{"
-    echo "\"nodes\": ["
+    {
+        echo "{"
+        echo "\"nodes\": ["
 
-    hdf5::files | hdf5::map hdf5::dir | while read _descriptor
-    do
-        eval "${_descriptor}"
+        hdf5::files | hdf5::map hdf5::dir | while read _descriptor
+        do
+            eval "${_descriptor}"
 
-        local _pathnodes="$(
-            echo "root${path}" | awk -F/ '{
-                for (i=1; i <= NF; ++i) {
-                    if (length($i) > 0) {
-                        print $i;
+            local _pathnodes="$(
+                echo "root${path}" | awk -F/ '{
+                    for (i=1; i <= NF; ++i) {
+                        if (length($i) > 0) {
+                            print $i;
+                        }
                     }
-                }
-            }'
-        )"
+                }'
+            )"
 
-        local _path_elements="$(
-            echo "["
-            echo "${_pathnodes}" | awk '{printf("%s\"%s\"", sep, $0); sep=",";}'
-            echo "]"
-        )"
+            local _parent="$(
+                echo "${_pathnodes}" |
+                head --lines=-1 |
+                awk '{printf("%s%s", sep, (NR > 1 ? $0 : "/")); if (NR > 1) {sep="/";}}'
+            )"
 
-        local _parent_elements="$(
-            echo "["
-            echo "${_pathnodes}" | head --lines=-1 | awk '{printf("%s\"%s\"", sep, $0); sep=",";}'
-            echo "]"
-        )"
+            echo "${_fs1}{"
+            echo "\"filename\": \"${filename}\""
+            echo ",\"path\": \"${path}\""
+            echo ",\"parent\": \"${_parent}\""
+            echo ",\"type\": \"${type}\""
+            echo "}"
 
-        local _parent="$(
-            echo "${_pathnodes}" |
-            head --lines=-1 |
-            awk '{printf("%s%s", sep, (NR > 1 ? $0 : "/")); if (NR > 1) {sep="/";}}'
-        )"
+            _fs1=","
+        done
 
-        echo "${_fs1}{"
-        echo "\"filename\": \"${filename}\""
-        echo ",\"path\": \"${path}\""
-        echo ",\"parent\": \"${_parent}\""
-        echo ",\"type\": \"${type}\""
-        echo ",\"path_elements\": ${_path_elements}"
-        echo ",\"parent_elements\": ${_parent_elements}"
+        echo "]"
         echo "}"
+    } | http::response_json
+}
 
-        _fs1=","
-    done
+http::hdf5::get_content() {
+    local _method="${1}" _request="${2}" _headers="${3}" _content="${4}"
 
-    echo "]"
-    echo "}"
+    local _truncated="$(echo "${_request}" | sed -e 's/^.*\/content\/*//1')"
+    local _parameters="$(echo "${_request}" | sed -e 's/^.*[\?]//1')"
+    local _filename="$(echo "${_truncated}" | awk -F/ '{print $1;}')"
+    local _node="$(echo "${_truncated}" | sed -e 's/^[^\/]*[\/]*//1')"
+    local _name
+    local _value
+
+    echo "${_parameters}" | awk -F\& '{for (i=1; i <= NF; ++i) {print $i;}}' | sed -e 's/=/ /1' | {
+        while read _name _value
+        do
+            local _value="$(echo "${_value}" | sed -e's/%\([0-9A-F][0-9A-F]\)/\\\\\x\1/g' | xargs echo -e)"
+            logging::info "WHAT: [${_name}] [${_value}]"
+            eval "${_name}=\"${_value}\""
+        done
+
+        logging::info "HERE: [${filename}] [${object}]"
+    }
+
+    http::404_error
 }

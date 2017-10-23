@@ -3,15 +3,16 @@ function init() {
 }
 
 function populate_tree(panel) {
-    function populate(treedata, d3_element, parent) {
-        for (i=0; i < treedata.length; ++i) {
+    function populate(treedata, d3_element, filename, parent, depth, item_count) {
+        for (var i=0; i < item_count; ++i) {
             var node = treedata[i];
 
-            if (parent != node.parent) {
+            if (filename != node.filename && filename != null) {
                 continue;
             }
-
-            console.log("Populating " + node.filename + " " + node.path);
+            else if (parent != node.parent) {
+                continue;
+            }
 
             var label = (
                 parent == "" ? node.filename : node.path
@@ -23,40 +24,37 @@ function populate_tree(panel) {
                 child_element
                     .append("summary")
                     .text(label)
+                    .on("click", function() {select_group(node, this);})
                 ;
 
-                populate(treedata, child_element, node.path);
+                populate(treedata, child_element, node.filename, node.path, depth + 1, item_count);
             } else {
                 var child_element = d3_element.append("div");
 
                 child_element
                     .text(label)
+                    .on("click", function() {select_content(node, this);})
                 ;
             }
-
-            child_element
-                .on("click", function() {select_content(node, this);})
-            ;
         }
+    }
+
+    function select_group(node, element) {
+        console.log("Selecting group" + node.filename + ":" + node.path);
     }
 
     function select_content(node, element) {
         console.log("Selecting " + node.filename + ":" + node.path);
     }
 
-    function refresh_display(treedata, panel) {
-        var d3_element = d3.select(panel);
-
-        d3_element.html("");
-
-        populate(treedata, d3_element, "");
-    }
-
     ajaxFunction(
         "/api/tree/",
 
         function(ajax_result){
-            refresh_display(ajax_result["nodes"], panel);
+            var d3_element = d3.select(panel);
+            var treedata = ajax_result["nodes"];
+            d3_element.html("");
+            populate(treedata, d3_element, null, "", 0, treedata.length);
         },
 
         function(ajax_exception){

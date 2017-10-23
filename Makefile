@@ -18,7 +18,7 @@ install: tests
 	@rsync -az build/ $(INSTALL_PATH)/
 
 demo: all
-	build/bin/$(FEATURE) --hdf5=/tmp/demo.h5 --port=7272
+	build/bin/$(FEATURE) $(shell ls -1 /tmp/*.h5 | while read name; do echo --hdf5=$$name; done) --port=7272
 
 version: all
 	@build/bin/$(FEATURE) --version
