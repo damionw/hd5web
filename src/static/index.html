@@ -5,9 +5,12 @@
 
         <title>Expanding Menu Demo</title>
 
+        <link rel="stylesheet" href="/static/Grid.css" media="screen">
+
         <script type="application/javascript" language="javascript" src="/static/d3.min.js"></script>
         <script type="application/javascript" language="javascript" src="/static/ajax.js"></script>
         <script type="application/javascript" language="javascript" src="/static/functions.js"></script>
+        <script type="application/javascript" language="javascript" src="/static/Grid.js"></script>
 
         <style>
             body, html {
@@ -18,12 +21,18 @@
                 width: calc(100% - 1px);
             }
 
+            #surface {
+                float: left;
+                overflow: auto;
+            }
+
             #panel {
+                float: left;
                 display: table;
-/*                 background-color: hsla(120, 100%, 40%, 1); */
                 background: #2f2f2f;
                 height: 100%;
                 color: white;
+                overflow: auto;
             }
 
             #panel * {
@@ -84,6 +93,8 @@
 
     <body>
         <div id="panel">
+        </div>
+        <div id="surface">
         </div>
     </body>
     <script>

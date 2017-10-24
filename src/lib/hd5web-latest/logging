@@ -42,7 +42,11 @@ logging::format() {
 
     if (logging::get_levels | grep -q '^'"${_mode}"'$')
     then
-        echo "$(logging::get_severity | tr '[a-z]' '[A-Z]'): $*" >&2
+        local _display_mode=$(echo "${1:-info}" | tr '[a-z]' '[A-Z]')
+        local _display_date="$(date '+%Y-%m-%d %H:%M:%S')"
+
+        # echo "${_display_date} ${_display_mode}: $*" >&2
+        echo "${_display_date}: $*" >&2
     fi
 }
 

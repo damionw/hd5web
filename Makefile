@@ -17,8 +17,9 @@ all: build/bin build/lib/$(FEATURE) build/bin/$(FEATURE) \
 install: tests
 	@rsync -az build/ $(INSTALL_PATH)/
 
-demo: all
-	build/bin/$(FEATURE) $(shell ls -1 /tmp/*.h5 | while read name; do echo --hdf5=$$name; done) --port=7272
+demo: all checkouts/recipes
+	build/bin/$(FEATURE) $$(ls -1 /tmp/*.h5 | while read name; do echo -n --hdf5=$$name " "; done) --port=7272
+#	checkouts/recipes/bash/monitored_runner "make; build/bin/$(FEATURE) $$(ls -1 /tmp/*.h5 | while read name; do echo -n --hdf5=$$name " "; done) --port=7272" src
 
 version: all
 	@build/bin/$(FEATURE) --version

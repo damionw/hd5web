@@ -59,9 +59,15 @@ http::hdf5::get_tree() {
                 awk '{printf("%s%s", sep, (NR > 1 ? $0 : "/")); if (NR > 1) {sep="/";}}'
             )"
 
+            local _name=$(
+                echo "${_pathnodes}" |
+                tail -1
+            )
+
             echo "${_fs1}{"
             echo "\"filename\": \"${filename}\""
             echo ",\"path\": \"${path}\""
+            echo ",\"name\": \"${_name}\""
             echo ",\"parent\": \"${_parent}\""
             echo ",\"type\": \"${type}\""
             echo "}"
@@ -77,23 +83,43 @@ http::hdf5::get_tree() {
 http::hdf5::get_content() {
     local _method="${1}" _request="${2}" _headers="${3}" _content="${4}"
 
+    http::hdf5::importlib
+
     local _truncated="$(echo "${_request}" | sed -e 's/^.*\/content\/*//1')"
     local _parameters="$(echo "${_request}" | sed -e 's/^.*[\?]//1')"
     local _filename="$(echo "${_truncated}" | awk -F/ '{print $1;}')"
     local _node="$(echo "${_truncated}" | sed -e 's/^[^\/]*[\/]*//1')"
     local _name
     local _value
+    local _header
+    local _row
+    local _sep
 
     echo "${_parameters}" | awk -F\& '{for (i=1; i <= NF; ++i) {print $i;}}' | sed -e 's/=/ /1' | {
         while read _name _value
         do
             local _value="$(echo "${_value}" | sed -e's/%\([0-9A-F][0-9A-F]\)/\\\\\x\1/g' | xargs echo -e)"
-            logging::info "WHAT: [${_name}] [${_value}]"
+            logging::warning "${_name}=\"${_value}\""
             eval "${_name}=\"${_value}\""
         done
 
-        logging::info "HERE: [${filename}] [${object}]"
-    }
+        hdf5::content "${filename}" "${path}" "${offset:-0}" "${count}" | {
+            read _header
 
-    http::404_error
+            echo "{"
+            echo "\"columns\": [${_header}]"
+            echo ",\"data\": ["
+
+            _sep=
+
+            while read _row
+            do
+                echo "${_sep}[${_row}]"
+                _sep=","
+            done
+
+            echo "]"
+            echo "}"
+        }
+    } | http::response_json
 }

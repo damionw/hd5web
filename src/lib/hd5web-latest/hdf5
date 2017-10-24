@@ -49,3 +49,94 @@ hdf5::dir() {
             }
         }' on=0 filename="${_filename}"
 }
+
+hdf5::header() {
+    local _filename="${1:?Need filename}"
+    local _path="${2:?Need path}"
+
+    h5dump -d "${_path}" -s 0 -c 0 "${_filename}" | awk '
+        /^   DATATYPE  H5T_COMPOUND [\{]/ {
+            if (! header) {
+                header=1;
+            }
+            section=1;
+        }
+
+        /^   [\}]/ {
+            section=0;
+        }
+
+        {
+            if (header == 1) {
+                if (section == 0) {
+                    printf("\n");
+                    header=2;
+                    sep="";
+                }
+                else if (section > 1) {
+                    gsub(/([\"][\;]*)/, "", $NF);
+                    printf("%s\"%s\"", sep, $NF);
+                    sep=",";
+                }
+            }
+
+            ++section;
+        }
+    '
+}
+
+hdf5::rows() {
+    local _filename="${1:?Need filename}"
+    local _path="${2:?Need path}"
+    local _offset="${3:-0}"
+    local _count="${4}"
+
+    h5dump -d "${_path}" -s "${_offset}" ${_count:+-c ${_count}} "${_filename}" | awk '
+        /^   SUBSET /{
+            if (! subset) {
+                subset=1;
+            }
+        }
+
+        /^   [\}]/ {
+            subset=0;
+            _row=0;
+        }
+
+        /^      [\(][0-9]+[\)][\:] [\{]/ {
+            if (subset) {
+                _row=1;
+            }
+        }
+
+        /^         [\}][\,]*/ {
+            if (_row) {
+                sep="\n";
+                _row=0;
+            }
+        }
+
+        {
+            if (_row) {
+                if (_row > 1) {
+                    gsub(/([\,]$)/, "", $NF);
+                    printf("%s\"%s\"", sep, $NF);
+                    sep=",";
+                }
+
+                ++_row;
+            }
+
+        }
+    '
+}
+
+hdf5::content() {
+    local _filename="${1:?Need filename}"
+    local _path="${2:?Need path}"
+    local _offset="${3:-0}"
+    local _count="${4}"
+
+    hdf5::header "${_filename}" "${_path}"
+    hdf5::rows "${_filename}" "${_path}" "${_offset}" "${_count}"
+}
